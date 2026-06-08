@@ -1,0 +1,1 @@
+{"dataset_dir": "data/classification-dataset", "image_height": 224, "image_width": 224, "batch_size": 32, "validation_split": 0.2}
