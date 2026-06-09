@@ -3,3 +3,12 @@ data/test-video
 
 Dataset
 outputs
+
+venv/
+__pycache__/
+.ipynb_checkpoints/
+
+outputs/
+*.pyc
+
+models/*.keras
