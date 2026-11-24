@@ -95,3 +95,18 @@ def test_draw_detections_empty_frame():
     assert vis.draw_detections(None, []) is None
     empty_frame = np.zeros((0, 0, 3), dtype=np.uint8)
     assert vis.draw_detections(empty_frame, []).size == 0
+
+
+def test_legacy_draw_detection_compatibility():
+    """Verify legacy dictionary-based draw_detection from src.utils still functions."""
+    from src.utils import draw_detection
+
+    frame = np.zeros((300, 400, 3), dtype=np.uint8)
+    legacy_det = {
+        "box": (10, 20, 100, 120),
+        "class_name": "Car",
+        "confidence": 0.95,
+    }
+    annotated = draw_detection(frame, legacy_det)
+    assert annotated is not None
+    assert np.any(annotated > 0)
