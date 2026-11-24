@@ -1,29 +1,14 @@
 import cv2
-import json
 
-from src.detector import VehicleDetector
-from src.classifier import VehicleClassifier
+from src.pipeline import VehiclePipeline
 
-with open("artifacts/class_indices.json", "r") as f:
-    class_indices = json.load(f)
+# Initialize the two-stage pipeline from centralized configuration
+pipeline = VehiclePipeline.from_config()
 
-idx_to_class = {
-    v: k
-    for k, v in class_indices.items()
-}
-
-detector = VehicleDetector(
-    model_path="yolov8n.pt",
-    conf=0.4
-)
-
-classifier = VehicleClassifier(
-    model_path="models/vehicle_classifier_best.keras",
-    idx_to_class=idx_to_class
-)
-
-
+# Camera initialization (try camera 1 first, fallback to camera 0 if not opened)
 cap = cv2.VideoCapture(1)
+if not cap.isOpened():
+    cap = cv2.VideoCapture(0)
 
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
@@ -36,68 +21,55 @@ window_name = "Real-Time Vehicle Classification"
 
 cv2.namedWindow(
     window_name,
-    cv2.WINDOW_NORMAL
+    cv2.WINDOW_NORMAL,
 )
 
 cv2.setWindowProperty(
     window_name,
     cv2.WND_PROP_FULLSCREEN,
-    cv2.WINDOW_FULLSCREEN
+    cv2.WINDOW_FULLSCREEN,
 )
 
 while True:
-
     ret, frame = cap.read()
 
     if not ret:
         print("Failed to read frame")
         break
 
-    detections = detector.detect(frame)
+    # Process frame through two-stage pipeline (detection -> safe cropping -> MobileNetV2)
+    predictions = pipeline.process_frame(frame)
 
-    for detection in detections:
-
-        x1, y1, x2, y2 = detection["box"]
-        yolo_class = detection["yolo_class"]
-        yolo_conf = detection["confidence"]
-
-        crop = frame[y1:y2, x1:x2]
-
-        cnn_class, cnn_conf = classifier.predict(crop)
-
-        label = (
-            f"YOLO:{yolo_class} ({yolo_conf:.2f}) | "
-            f"CNN:{cnn_class} ({cnn_conf:.2f})"
-        )
+    for pred in predictions:
+        x1, y1, x2, y2 = pred.box
 
         cv2.rectangle(
             frame,
             (x1, y1),
             (x2, y2),
             (0, 255, 0),
-            2
+            2,
         )
 
         cv2.putText(
             frame,
-            label,
+            pred.display_label,
             (x1, y1 - 10),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.6,
             (0, 255, 0),
-            2
+            2,
         )
 
     cv2.imshow(
         window_name,
-        frame
+        frame,
     )
 
     key = cv2.waitKey(1) & 0xFF
 
     if key == ord("q"):
         break
-
 
     if key == 27:
         break
