@@ -121,6 +121,21 @@ class LoggingConfig(BaseModel):
         return upper_v
 
 
+class TrackingConfig(BaseModel):
+    """MLflow experiment tracking configuration."""
+    enabled: bool = True
+    experiment_name: str = Field(default="vehicle-type-classification", min_length=1)
+    tracking_uri: str = Field(default="sqlite:///mlflow.db", min_length=1)
+    log_models: bool = True
+
+    @field_validator("experiment_name", "tracking_uri")
+    @classmethod
+    def validate_non_empty(cls, v: str, info) -> str:
+        if not isinstance(v, str) or not v.strip():
+            raise ValueError(f"'{info.field_name}' must be a non-empty string.")
+        return v.strip()
+
+
 class AppConfig(BaseModel):
     """Master application configuration model."""
     project: ProjectConfig = Field(default_factory=ProjectConfig)
@@ -131,6 +146,7 @@ class AppConfig(BaseModel):
     training: TrainingConfig = Field(default_factory=TrainingConfig)
     inference: InferenceConfig = Field(default_factory=InferenceConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
+    tracking: TrackingConfig = Field(default_factory=TrackingConfig)
 
     # Convenience properties that return fully resolved absolute Path objects
     @property

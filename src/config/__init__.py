@@ -9,6 +9,7 @@ from src.config.schema import (
     LoggingConfig,
     PathsConfig,
     ProjectConfig,
+    TrackingConfig,
     TrainingConfig,
     load_config,
 )
@@ -22,6 +23,7 @@ __all__ = [
     "LoggingConfig",
     "PathsConfig",
     "ProjectConfig",
+    "TrackingConfig",
     "TrainingConfig",
     "load_config",
 ]
