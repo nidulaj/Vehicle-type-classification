@@ -87,3 +87,10 @@ logging:
   log_to_file: true
   log_file: "outputs/logs/app.log"
 
+# Experiment Tracking Configuration (MLflow)
+tracking:
+  enabled: true
+  experiment_name: "vehicle-type-classification"
+  tracking_uri: "sqlite:///mlflow.db"
+  log_models: true
+

@@ -11,3 +11,11 @@ __pycache__/
 *.pyc
 
 models/*.keras
+
+# MLflow Experiment Tracking
+mlruns/
+.mlflow/
+mlflow.db
+mlflow.db-journal
+mlflow.db-wal
+mlflow.db-shm
